@@ -1,0 +1,21 @@
+People
+--
+>>
+max
+>
+what is this guy's name?
+>>
+eric
+>
+who is this other guy?
+||
+IDEs
+--
+>>
+idle
+>
+what is slow?
+>>
+vim
+>
+what is op?
