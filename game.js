@@ -26,7 +26,7 @@ const net= require('net');
 
 
 const host = 'localhost';
-const port = 1016;
+const port = 8016;
 
 
 class Player {
@@ -75,6 +75,7 @@ class main  {
 		this.state = dict;
 		this.players = [];
 		this.names = [];
+		this.start = false;
 	}
 	addPlayer(name) {
 		if (!(this.names.includes(name))) {
@@ -116,71 +117,74 @@ class main  {
 			this.modifyScore(name, -1*amount);
 		}
 	}
+	begin() {
+		this.start = true;
+	}
 }
 
 	
-
+//create an instance of the game.
 let h =new main('hello.txt');
 
-console.log(h.state);
-console.log(h.players);
+let players = [];
+let playerID = 0;
 
-console.log('\neric joins\n');
-
-h.addPlayer('eric');
-console.log(h.players);
-
-console.log('\nbob is kicked out\n');
-
-h.rmvPlayer('bob');
-console.log(h.players);
+let master;
+function writeToMaster() {}
 
 
-console.log('\neric joins\n');
+const server = net.createServer( (socket) => {
+	console.log('someone appeared');
+	
+	socket.on('data', (data) => {
+		// data will be of the form 'name' (to identify who joined/buzzed)
+		// spaces will be changed to underscores
+		// or of the form 'admin name' for the master
+		let ident = data.toString();
+		console.log( ident);
+		let answerers = [];
+		if (h.start) {
+			if (!(socket.id	== 'master')) {
+				answerers.push(socket.id);
+			}
+		}
+		else {
+			// true if player, false if master
+			if (2 - ident.split(' ').length) {
 
-h.addPlayer('eric');
-console.log(h.players);
+				socket.write('welcome\r\n');
+				socket.pipe(socket);
+				socket.id = playerID ++;
+				players.push(socket);
+			}
+			else {
+				socket.id = 'master'
+				master = socket
+			}
+		}
+	});
 
-console.log('\nmax joins\n');
+	socket.on('close', () => {
+		if (socket.id != 'master') {
+			for (let i = 0; i < players.length; i++) {
+				if (players[i].id == socket.id) {
+					players.splice(i, 1);
+				}
+			}
+			console.log(socket.id + ' has disconnected');
+		}
+		
+	})
 
-h.addPlayer('max');
-console.log(h.players);
+	socket.on('error', () => {
+	})
 
-console.log('\narcq joins\n');
 
-h.addPlayer('arcq');
-console.log(h.players);
 
-console.log('\narcq is kicked out\n');
 
-h.rmvPlayer('arcq');
-console.log(h.players);
+});
+	
+server.listen(port, host, () => {
+	console.log('listening...')
+})
 
-console.log('\neric gets 100 points\n');
-
-h.modifyScore('eric', 100);
-console.log(h.players);
-
-console.log('\neric correctly answers People 200\n');
-
-h.answerQuestion('eric','People',200,true);
-console.log(h.state);
-console.log(h.players);
-
-console.log('\nmax incorrectly answers IDEs 100\n');
-
-h.answerQuestion('max','IDEs',100,false);
-console.log(h.state);
-console.log(h.players);
-
-console.log('\neric correctly answers IDEs 100\n');
-
-h.answerQuestion('eric','IDEs',100,true);
-console.log(h.state);
-console.log(h.players);
-
-console.log('\nmax correctly answers IDEs 100\n');
-
-h.answerQuestion('max','IDEs',100,true);
-console.log(h.state);
-console.log(h.players);
