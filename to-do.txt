@@ -1,0 +1,19 @@
+how the connections should work:
+player moves are sent to and evaluated by the server.
+server updates the game 'host' on the state of the game.
+
+server listens to player connections
+server emits to front-end connection
+
+
+
+ ______
+[player] -----------
+                    \       ______
+                     \     /      \              _________
+ ______               ---->|      |             |         |
+[player] ----------------->|server| ----------> |front-end|
+                      ---->|      |             |_________|
+                     /     \______/
+ ______             /
+[player] -----------
