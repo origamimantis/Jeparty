@@ -26,7 +26,8 @@ const net= require('net');
 
 
 const host = 'localhost';
-const port = 8016;
+const playerport = 8016;
+const masterport = 8418;
 
 
 class Player {
@@ -36,8 +37,7 @@ class Player {
 	}
 	changeScore(amount){
 		this.score += amount;
-	}
-}
+	}}
 
 class SingleQuestion {
 	constructor(question, answer){
@@ -47,8 +47,7 @@ class SingleQuestion {
 	}
 	markComplete() {
 		this.done = true;
-	}
-}
+	}}
 
 
 
@@ -69,122 +68,75 @@ class main  {
 
 				subdict[(ind)*100] = new SingleQuestion( question, answer );
 			}
-			dict[categoryName] = subdict;
-		}
-		
-		this.state = dict;
-		this.players = [];
-		this.names = [];
-		this.start = false;
-	}
-	addPlayer(name) {
-		if (!(this.names.includes(name))) {
-			this.players.push(new Player(name));
-			this.names.push(name);
-		}
-		
-		else {
-			console.log('player already exists.');
-		}
-	}
+			dict[categoryName] = subdict}
 
-	rmvPlayer(name) {
-		let idx = this.names.indexOf(name);
-		if (idx != -1){
-			this.players.splice(idx,1);
-			this.names.splice(idx,1);
-		}
-		else {
-			console.log('this player doesn\'nt exist.');
-		}
-	}
+		this.currentQuestion = null;
+		this.currentPlayer = null;
+		this.state = dict}
 
+	modifyScore(amount) {
+		players[this.currentPlayer][1] += amount}
 
-	modifyScore(name, amount) {
-
-		this.players[this.names.indexOf(name)].changeScore(amount);
-	}
-
-	answerQuestion(name, category, amount, correct) {
-		if (this.state[category][amount].done) {
-			console.log('this question was answered already.');
-		}
-		else if (correct) {
-			this.modifyScore(name, amount);
-			this.state[category][amount].markComplete();
-		}
-		else {
-			this.modifyScore(name, -1*amount);
-		}
-	}
-	begin() {
-		this.start = true;
-	}
+	markComplete() {
+		this.state[currentQuestion[0]][currentQuestion[1]].markComplete()}
 }
 
 	
 //create an instance of the game.
-let h =new main('hello.txt');
+let theGame =new main('hello.txt');
 
-let players = [];
+
+// id : name
+const players = {}
+
+// waiting:before the game has started
+// selecting: master selects a category and points amount
+// playing: players buzz
+// reviewing: master determines whether answer is right
+
+gameStatus = 'waiting'
+
+
+
 let playerID = 0;
 
-let master;
-function writeToMaster() {}
+let master= null;
+
+// Used to probably signal when buzzing is allowed
+function writetoPlayers() {}
 
 
-const server = net.createServer( (socket) => {
-	console.log('someone appeared');
+
+const playerserver = net.createServer( (player) => {
 	
-	socket.on('data', (data) => {
-		// data will be of the form 'name' (to identify who joined/buzzed)
-		// spaces will be changed to underscores
-		// or of the form 'admin name' for the master
-		let ident = data.toString();
-		console.log( ident);
-		let answerers = [];
-		if (h.start) {
-			if (!(socket.id	== 'master')) {
-				answerers.push(socket.id);
-			}
-		}
-		else {
-			// true if player, false if master
-			if (2 - ident.split(' ').length) {
+	player.added = false
 
-				socket.write('welcome\r\n');
-				socket.pipe(socket);
-				socket.id = playerID ++;
-				players.push(socket);
-			}
-			else {
-				socket.id = 'master'
-				master = socket
-			}
-		}
-	});
+	player.on('data', (data) => {
 
-	socket.on('close', () => {
-		if (socket.id != 'master') {
-			for (let i = 0; i < players.length; i++) {
-				if (players[i].id == socket.id) {
-					players.splice(i, 1);
-				}
-			}
-			console.log(socket.id + ' has disconnected');
-		}
-		
-	})
+		//players shouldn't be able to do anything when
+		//selecting or revieweing
 
-	socket.on('error', () => {
-	})
+		if (gameStatus == 'waiting') {
+			if (!player.added) {
+				
+				// create a unique id by adding 1
+				player.id = playerID ++
 
+				// set id:name
+				players[player.id] = [data.toString().trim(), 0]
+				player.added = true
 
+		else if (gameStatus == 'playing') {
 
-
+			gameStatus = 'reviewing'
+			theGame.currentPlayer = player.id
 });
 	
-server.listen(port, host, () => {
-	console.log('listening...')
-})
+const masterserver = net.createServer( (socket) => {
+	
+});
+
+
+playerserver.listen(playerport, host, () => {})
+masterserver.listen(masterport, host, () => {})
 
