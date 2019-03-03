@@ -1,7 +1,7 @@
 # Jeparty
-jeopardy! server and client
+jeopardy! server and client programs
 
-server is server.js
+run the server with server.js (currently on localhost)
 
 master\_temp.py is the game host program, will eventually be put into something else.
 
