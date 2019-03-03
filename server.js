@@ -30,6 +30,7 @@ const playerport = 8016;
 const masterport = 8418;
 const viewerport = 8791;
 
+const questionsFile = 'questions.txt'
 
 class Player {
 	constructor(username) {
@@ -89,7 +90,7 @@ class main  {
 
 	
 //create an instance of the game.
-let theGame =new main('hello.txt');
+let theGame =new main(questionsFile);
 
 
 // id : name

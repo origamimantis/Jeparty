@@ -39,3 +39,8 @@ game has 4 'states':
                             /
         ______   commands  /
        [ host ] -----------
+
+
+
+
+
