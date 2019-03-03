@@ -1,21 +1,45 @@
 People
 --
 >>
-max
+javascript
 >
-what is this guy's name?
+what is max's favorite programming language?
 >>
-eric
+eric's favorite method
 >
-who is this other guy?
+what is shell method?
+>>
+wtf man???
+>
+who is victor?
+>>
+og bump it
+>
+who is krish
+>>
+this man has the biggest black forest ham.
+>
+who is archit garg?
 ||
 IDEs
 --
 >>
-idle
+slow
 >
-what is slow?
+what is idle?
 >>
-vim
+op
 >
-what is op?
+what is vim?
+>>
+the most frustrating IDE
+>
+that is notepad?
+>>
+this IDE is the most overrated python IDE
+>
+What is pycharm?
+>>
+vscode
+>
+what is kevin's favorite IDE?
