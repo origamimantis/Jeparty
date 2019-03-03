@@ -25,6 +25,7 @@ const net= require('net');
 
 
 
+//const host = '...';
 const host = 'localhost';
 const playerport = 8016;
 const masterport = 8418;
