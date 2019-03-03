@@ -34,15 +34,17 @@ class Player {
 	constructor(username) {
 		this.name = username;
 		this.score = 0;
+		this.canAnswer = true
 	}
 	changeScore(amount){
 		this.score += amount;
 	}}
 
 class SingleQuestion {
-	constructor(question, answer){
+	constructor(question, answer, amount){
 		this.question = question;
 		this.answer = answer;
+		this.amount = amount
 		this.done = false;
 	}
 	markComplete() {
@@ -66,7 +68,7 @@ class main  {
 				let question = qSplit[ind].split('\n>')[0].trim();
 				let answer = qSplit[ind].split('\n>')[1].trim();
 
-				subdict[(ind)*100] = new SingleQuestion( question, answer );
+				subdict[(ind)*100] = new SingleQuestion( question, answer , ind*100);
 			}
 			dict[categoryName] = subdict}
 
@@ -75,10 +77,11 @@ class main  {
 		this.state = dict}
 
 	modifyScore(amount) {
-		players[this.currentPlayer][1] += amount}
+		players[this.currentPlayer].score += amount}
 
-	markComplete() {
-		this.state[currentQuestion[0]][currentQuestion[1]].markComplete()}
+	markCurrentQuestionComplete() {
+		this.currentQuestion.markComplete()
+		this.currentQuestion = null}
 }
 
 	
@@ -94,16 +97,25 @@ const players = {}
 // playing: players buzz
 // reviewing: master determines whether answer is right
 
-gameStatus = 'waiting'
+var gameStatus = 'waiting'
 
 
 
 let playerID = 0;
 
-let master= null;
+let master = {}
 
 // Used to probably signal when buzzing is allowed
 function writetoPlayers() {}
+
+
+function enableAnswers() {
+	// allows players who have already buzzed to buzz again.
+	for (let id in players) {
+		players[id].canAnswer = true}
+}
+
+
 
 
 
@@ -116,27 +128,117 @@ const playerserver = net.createServer( (player) => {
 		//players shouldn't be able to do anything when
 		//selecting or revieweing
 
+		// First message from player should be of form 'PLAYER player_name'
 		if (gameStatus == 'waiting') {
-			if (!player.added) {
+			if (!player.added && (data.toString().search('PLAYER') == 0)) {
 				
 				// create a unique id by adding 1
 				player.id = playerID ++
 
-				// set id:name
-				players[player.id] = [data.toString().trim(), 0]
+				// set id:Player{name:name, score:0}
+				players[player.id] = new Player(data.toString().trim().split(' ')[1])
+				
 				player.added = true
+			}
+		}
 
-		else if (gameStatus == 'playing') {
-
+		else if (gameStatus == 'playing' && players[player.id].canAnswer) {
+			players[player.id].canAnswer = false
 			gameStatus = 'reviewing'
 			theGame.currentPlayer = player.id
+		}
+	});
+	player.on('close', () => {
+		// maybe not delete if we want score to be kept.
+		delete players[player.id]
+	});
 });
 	
 const masterserver = net.createServer( (socket) => {
+
+	socket.on('data', (data) => {
+		let received = data.toString().trim()
+		console.log(received)
+		if (received == 'stat') {
+			console.log(theGame.state)
+		}
+		if (gameStatus == 'waiting') {
+			
+			// checks if master does not yet exist
+			if(!master.name && received.search('MASTER') == 0 && received.split(' ').length == 3){
+				master.name  = received.split(' ')[1]
+				master.id  = 'M' + received.split(' ')[2]
+				console.log(master)
+			}
+			else if (received == 'GAME_BEGIN') {
+				console.log('began')
+				gameStatus = 'selecting'
+			}
+			else if (master.name && received.search('MASTER') == 0){
+				socket.destroy()
+			}
+		}
+		else if (gameStatus == 'selecting') {
+			// form 'SELECT category amount'
+			if (received.search('SELECT') == 0 && received.split(' ').length == 3) {
+				//current question is now a class instance
+				theGame.currentQuestion = theGame.state[received.split(' ')[1]][received.split(' ')[2]]
+				gameStatus = 'playing'
+			}
+		}
+		else if (gameStatus == 'playing') {
+			if (received == 'QUESTION_SKIP') {
+				//mark question complete, proceed to selecting
+				theGame.markCurrentQuestionComplete()
+				enableAnswers()
+				gameStatus = 'selecting'
+			}
+		}
+		else if (gameStatus == 'reviewing') {
+			if (received == 'QUESTION_SKIP') {
+				//mark complete, proceed to selecting
+				theGame.markCurrentQuestionComplete()
+				enableAnswers()
+				gameStatus = 'selecting'
+			}
+			else if (received == 'QUESTION_CORRECT') {
+				//mark complete, add points, proceed to selecting
+				theGame.modifyScore(theGame.currentQuestion.amount)
+				theGame.markCurrentQuestionComplete()
+				enableAnswers()
+				gameStatus = 'selecting'
+			}
+			else if (received == 'QUESTION_INCORRECT') {
+				//subtract points, proceed to playing
+				theGame.modifyScore(-1*theGame.currentQuestion.amount)
+				gameStatus = 'playing'
+			}
+		}
+				
+
+	});  //end on 'data'
+	socket.on('close', () => {
+		delete master.name
+		delete master.id
+	});  //end on 'close'
+				
 	
 });
 
 
 playerserver.listen(playerport, host, () => {})
 masterserver.listen(masterport, host, () => {})
+
+
+
+// log updates to console
+setInterval(() => {
+	console.log('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
+	console.log('-------\n')
+	console.log(players)
+	console.log(master)
+	console.log(gameStatus)
+	console.log(theGame.currentQuestion)
+	console.log('\n')
+}, 3000);
 
