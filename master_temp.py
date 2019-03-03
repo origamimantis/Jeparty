@@ -1,6 +1,10 @@
 import socket
 
-host = 8418
+
+
+host = 'localhost'
+port = 8418
+
 hello = socket.socket()
 
 
@@ -18,7 +22,7 @@ print('QUESTION_INCORRECT         : marks the question as wrong.')
 
 
 
-hello.connect(('localhost', host))
+hello.connect((host, port))
 
 ins = hello.makefile('r')
 out = hello.makefile('w')

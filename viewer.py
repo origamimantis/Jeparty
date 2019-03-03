@@ -1,11 +1,12 @@
 import socket
 
-host = 8791
+host = 'localhost'
+port = 8791
+
 hello = socket.socket()
 
-hello.connect(('localhost', host))
+hello.connect((host, port))
 ins = hello.makefile('r')
-out = hello.makefile('w')
 
 
 print('\n'*35)
@@ -17,5 +18,4 @@ while True:
         print()
 
 ins.close()
-out.close()
 hello.close()

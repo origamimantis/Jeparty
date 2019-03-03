@@ -18,7 +18,7 @@ game has 4 'states':
  - during 'reviewing', the master sends 'QUESTION_CORRECT' or 'QUESTION_INCORRECT' for an answer.
 
 >viewer<
- - messages sent are ignored.
+ - messages cannot be sent.
  - receives massages from the server on game events, such as 'Bob (id: 3) answered correctly!'.
 
 

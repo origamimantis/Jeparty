@@ -1,6 +1,7 @@
 import socket
 
-host = 8016
+host = 'localhost'
+port = 8016
 hello = socket.socket()
 
 name = input('enter player name: ').strip()
@@ -9,7 +10,7 @@ if name == '':
 
 name =  'PLAYER '+ '_'.join(name.split())
 
-hello.connect(('localhost', host))
+hello.connect((host, port))
 ins = hello.makefile('r')
 out = hello.makefile('w')
     
