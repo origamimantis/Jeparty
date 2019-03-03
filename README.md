@@ -1,2 +1,2 @@
 # Jeparty
-jeopardy! server and client
+jeopardy! server and clients
