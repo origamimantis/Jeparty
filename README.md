@@ -1,4 +1,5 @@
 # Jeparty
+<<<<<<< HEAD
 jeopardy! server and client
 
 
@@ -44,3 +45,6 @@ game has 4 'states':
                             /
         ______   commands  /
        [ host ] -----------
+=======
+jeopardy! server and clients
+>>>>>>> a19b5a70ca31e0d54a7a6ad09f166e0035b75e46
