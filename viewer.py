@@ -12,10 +12,9 @@ ins = hello.makefile('r')
 print('\n'*35)
 
 while True:
-    yee = ins.readline()[:-1].strip()
+    yee = ins.readline()[:-1]
     if yee != '':
         print(yee)
-        print()
 
 ins.close()
 hello.close()

@@ -110,9 +110,10 @@ let playerID = 0;
 
 let master = {}
 
-function writeToViewers(data) {
+function writeToViewers(data, space = true) {
 	for (let v of viewers) {
-		v.write(data + '\r\n');
+		v.write('> ' + data + '\r\n');
+		if (space) {v.write('> \r\n')}
 	}
 }
 
@@ -124,6 +125,23 @@ function enableAnswers() {
 }
 
 
+function writeQuestions() {
+	// writes the state of the board to viewers.
+	for (let category in theGame.state) {
+		writeToViewers('     ' + category, false);
+		for (let i = 1 ; i <= 5; i ++) {
+			let j = (i*100).toString()
+			if (theGame.state[category][i*100].done) {
+				writeToViewers('       ---' , false);
+			}
+			else {
+				writeToViewers('       ' + i*100 , false);
+			}
+		}
+	writeToViewers('', false)
+		
+	}
+}
 
 
 
@@ -186,6 +204,7 @@ const masterserver = net.createServer( (socket) => {
 			}
 			else if (received == 'GAME_BEGIN') {
 				gameStatus = 'selecting';
+				writeQuestions()
 				
 				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') is selecting a question.');
 			}
@@ -201,10 +220,16 @@ const masterserver = net.createServer( (socket) => {
 				//current question is now a class instance
 				theGame.currentQuestion = theGame.state[received.split(' ')[1]][received.split(' ')[2]];
 				theGame.currentCategory = received.split(' ')[1];
-				gameStatus = 'playing';
-				
-				writeToViewers( 'The category is: '+received.split(' ')[1]+' for '+received.split(' ')[2] );
-				writeToViewers( '---> ' + theGame.currentQuestion.question );
+				if (theGame.currentQuestion.done) {
+					writeToViewers( 'Game host selected '+received.split(' ')[1]+' for '+received.split(' ')[2] + ' but it was already answered.' );
+					writeToViewers( 'Game host '+master.name+' (id: '+master.id+') is selecting a question.');
+					theGame.currentQuestion = null;
+				}
+				else {
+					gameStatus = 'playing';
+					writeToViewers( 'The category is: '+received.split(' ')[1]+' for '+received.split(' ')[2] );
+					writeToViewers( '---> ' + theGame.currentQuestion.question );
+				}
 			}
 		}
 		else if (gameStatus == 'playing') {
@@ -213,6 +238,8 @@ const masterserver = net.createServer( (socket) => {
 				theGame.markCurrentQuestionComplete();
 				enableAnswers();
 				gameStatus = 'selecting';
+				writeQuestions()
+
 				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') skipped the current question.');
 				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') is selecting a question.');
 			}
@@ -223,6 +250,7 @@ const masterserver = net.createServer( (socket) => {
 				theGame.markCurrentQuestionComplete();
 				enableAnswers();
 				gameStatus = 'selecting';
+				writeQuestions()
 				
 				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') skipped the current question.');
 				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') is selecting a question.');
@@ -232,13 +260,14 @@ const masterserver = net.createServer( (socket) => {
 				theGame.modifyScore(theGame.currentQuestion.amount);
 				enableAnswers();
 				gameStatus = 'selecting';
+	
 				
 				writeToViewers( players[theGame.currentPlayer].name+' (id: ' + theGame.currentPlayer + ') answered correctly!');
 				writeToViewers( 'The answer was: ' + theGame.currentQuestion.answer )
 				writeToViewers( players[theGame.currentPlayer].name + ' received ' + theGame.currentQuestion.amount + ' points.');
 				
 				theGame.markCurrentQuestionComplete();
-				
+				writeQuestions()			
 				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') is selecting a question.');
 			}
 			else if (received == 'QUESTION_INCORRECT') {
