@@ -8,9 +8,10 @@ port = 8418
 hello = socket.socket()
 
 
-name = input('enter master id: ').strip()
+name = input('enter name: ').strip()
+idn = input('enter master id: ').strip()
 typ = 'm'
-name = 'MASTER ' + 'master ' + name
+name = 'MASTER ' +  name + ' ' + idn
 
 print('the protocol:')
 print('GAME_BEGIN                 : starts the game.')
