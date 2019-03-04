@@ -204,7 +204,7 @@ const masterserver = net.createServer( (socket) => {
 				gameStatus = 'playing';
 				
 				writeToViewers( 'The category is: '+received.split(' ')[1]+' for '+received.split(' ')[2] );
-				writeToViewers( '---> ' + theGame.currentQuestion.question )
+				writeToViewers( '---> ' + theGame.currentQuestion.question );
 			}
 		}
 		else if (gameStatus == 'playing') {
@@ -213,6 +213,8 @@ const masterserver = net.createServer( (socket) => {
 				theGame.markCurrentQuestionComplete();
 				enableAnswers();
 				gameStatus = 'selecting';
+				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') skipped the current question.');
+				writeToViewers( 'Game host '+master.name+' (id: '+master.id+') is selecting a question.');
 			}
 		}
 		else if (gameStatus == 'reviewing') {
