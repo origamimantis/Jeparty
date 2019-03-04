@@ -43,3 +43,26 @@ What is pycharm?
 vscode
 >
 what is kevin's favorite IDE?
+||
+Food
+--
+>>
+archie's favorite food place?
+>
+what is Subway
+>>
+Ryan's favorite food?
+>
+What is fried rice
+>>
+Krish's favorite food
+>
+what is chicken
+>>
+archie's favorite type of meat
+>
+what is man meat
+>>
+max's favorite tropical fruit
+>
+what is banana
