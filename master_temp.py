@@ -9,7 +9,12 @@ hello = socket.socket()
 
 
 name = input('enter name: ').strip()
-idn = input('enter master id: ').strip()
+if name == '':
+    name = 'master'
+
+idn = ''
+while idn == '':
+    idn = input('enter master id: ').strip()
 typ = 'm'
 name = 'MASTER ' +  name + ' ' + idn
 
